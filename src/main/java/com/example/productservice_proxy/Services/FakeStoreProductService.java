@@ -1,10 +1,12 @@
 package com.example.productservice_proxy.Services;
 
 import com.example.productservice_proxy.clients.IClientProductDto;
+import com.example.productservice_proxy.clients.fakestore.client.FakeStoreClient;
 import com.example.productservice_proxy.clients.fakestore.dto.FakeStoreProductDto;
 import com.example.productservice_proxy.dtos.ProductDto;
 import com.example.productservice_proxy.models.Categories;
 import com.example.productservice_proxy.models.Product;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -22,10 +24,12 @@ import java.util.List;
 @Service
 public class FakeStoreProductService implements IProductServices {
     private RestTemplateBuilder restTemplateBuilder;
-    public FakeStoreProductService(RestTemplateBuilder restTemplate){
-        this.restTemplateBuilder = restTemplate;
-    }
+    private FakeStoreClient fakeStoreClient;
 
+    public FakeStoreProductService(RestTemplateBuilder restTemplate, FakeStoreClient fakeStoreClient){
+        this.restTemplateBuilder = restTemplate;
+        this.fakeStoreClient = fakeStoreClient;
+    }
     private <T> ResponseEntity<T> requestForEntiry(HttpMethod httpMethod, String url, @Nullable Object request,
                                                    Class<T> responseType, Object... uriVariables) throws RestClientException {
         RestTemplate restTemplate = restTemplateBuilder.requestFactory(
@@ -40,13 +44,16 @@ public class FakeStoreProductService implements IProductServices {
 
     @Override
     public List<Product> getAllProducts(){
+        /*
         RestTemplate restTemplate = restTemplateBuilder.build();
         ResponseEntity<ProductDto[]> responseEntity =
                 restTemplate.getForEntity("https://fakestoreapi.com/products/",
                         ProductDto[].class);
+         */
+        List<FakeStoreProductDto> fakeStoreProductDtos = fakeStoreClient.getAllProducts();
         List<Product> products = new ArrayList<>();
 
-        for(ProductDto productDtos : responseEntity.getBody()){
+        for(FakeStoreProductDto productDtos : fakeStoreProductDtos){
                 Product product = new Product();
                 product.setId(productDtos.getId());
                 product.setTitle(productDtos.getTitle());
